@@ -27,6 +27,24 @@ const taskSchema = new mongoose.Schema(
       default: "medium",
     },
 
+    // Add this field inside taskSchema, after `priority`:
+    color: {
+      type: String,
+      enum: [
+        "default",
+        "gray",
+        "brown",
+        "orange",
+        "yellow",
+        "green",
+        "blue",
+        "purple",
+        "pink",
+        "red",
+      ],
+      default: "default",
+    },
+
     dueDate: {
       type: Date,
     },

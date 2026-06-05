@@ -14,4 +14,20 @@ export const taskValidation = [
     .optional()
     .isIn(["pending", "completed"])
     .withMessage("Invalid status"),
+
+  body("color")
+    .optional()
+    .isIn([
+      "default",
+      "gray",
+      "brown",
+      "orange",
+      "yellow",
+      "green",
+      "blue",
+      "purple",
+      "pink",
+      "red",
+    ])
+    .withMessage("Invalid color"),
 ];
