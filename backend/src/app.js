@@ -8,21 +8,11 @@ import { notFound, errorHandler } from "./middleware/errorMid.js";
 import authRoutes from "./routes/authRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
-// import testRoutes from "./routes/testRoutes.js";
 
 const app = express();
-// app.use("/api/test", testRoutes);
 
 // security middleware
 app.use(helmet());
-
-// app.use(
-//   cors({
-//     origin: process.env.CLIENT_URL,
-//     credentials: true,
-//   }),
-// );
-// console.log("CLIENT_URL =", process.env.CLIENT_URL);
 
 app.use(
   cors({

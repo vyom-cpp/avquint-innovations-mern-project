@@ -1,16 +1,3 @@
-// export const createTask = async (taskData) => {
-//   const response = await fetch("/api/tasks", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${localStorage.getItem("token")}`,
-//     },
-//     body: JSON.stringify(taskData),
-//   });
-//   if (!response.ok) throw new Error("Failed to create task");
-//   return response.json();
-// };
-
 const API_BASE = import.meta.env.VITE_API_URL || "/api";
 const BASE = `${API_BASE}/tasks`;
 

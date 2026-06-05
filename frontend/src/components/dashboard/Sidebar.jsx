@@ -14,7 +14,6 @@ const NAV_ITEMS = [
 const Sidebar = ({ onClose, collapsed = false }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  //   const theme = useTheme();
 
   const handleNav = (path) => {
     navigate(path);

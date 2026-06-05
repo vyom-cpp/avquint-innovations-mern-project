@@ -43,26 +43,6 @@ const RegisterPage = () => {
     }
   };
 
-  // const onSubmit = async (data) => {
-  //   try {
-  //     setLoading(true);
-
-  //     const response = await registerUser(data);
-
-  //     login(response.token, response.user);
-
-  //     toast.success("Account Created");
-
-  //     navigate("/dashboard");
-  //   } catch (error) {
-  //     console.log("REGISTER CRASH", error);
-
-  //     toast.error(error?.response?.data?.message || "Registration Failed");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   return (
     <AuthLayout title="Create Account" subtitle="Start managing tasks">
       <form onSubmit={handleSubmit(onSubmit)}>

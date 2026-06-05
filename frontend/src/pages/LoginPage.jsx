@@ -1,8 +1,4 @@
-import {
-  TextField,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { TextField, Stack, Typography } from "@mui/material";
 
 import { LoadingButton } from "@mui/lab";
 
@@ -21,68 +17,43 @@ import { useAuth } from "../context/AuthContext";
 import { loginUser } from "../services/authService";
 
 const LoginPage = () => {
-  const { register, handleSubmit } =
-    useForm();
+  const { register, handleSubmit } = useForm();
 
   const navigate = useNavigate();
 
   const { login } = useAuth();
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (data) => {
     try {
       setLoading(true);
 
-      const response =
-        await loginUser(data);
+      const response = await loginUser(data);
 
-      login(
-        response.token,
-        response.user
-      );
+      login(response.token, response.user);
 
-      toast.success(
-        "Login Successful"
-      );
+      toast.success("Login Successful");
 
       navigate("/dashboard");
     } catch (error) {
-      toast.error(
-        error?.response?.data
-          ?.message ||
-          "Login Failed"
-      );
+      toast.error(error?.response?.data?.message || "Login Failed");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AuthLayout
-      title="Welcome Back"
-      subtitle="Sign in to continue"
-    >
-      <form
-        onSubmit={handleSubmit(
-          onSubmit
-        )}
-      >
+    <AuthLayout title="Welcome Back" subtitle="Sign in to continue">
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>
-          <TextField
-            label="Email"
-            fullWidth
-            {...register("email")}
-          />
+          <TextField label="Email" fullWidth {...register("email")} />
 
           <TextField
             label="Password"
             type="password"
             fullWidth
-            {...register(
-              "password"
-            )}
+            {...register("password")}
           />
 
           <LoadingButton
@@ -94,13 +65,8 @@ const LoginPage = () => {
             Sign In
           </LoadingButton>
 
-          <Typography
-            textAlign="center"
-          >
-            Don't have an account?{" "}
-            <Link to="/register">
-              Register
-            </Link>
+          <Typography textAlign="center">
+            Don't have an account? <Link to="/register">Register</Link>
           </Typography>
         </Stack>
       </form>
