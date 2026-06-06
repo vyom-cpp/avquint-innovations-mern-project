@@ -10,7 +10,7 @@ The application incorporates JWT-based authentication, protected routes, real-ti
 **https://avquint-innovations-mern-project.vercel.app/login**
 
 **Project Demonstration Video:**  
-[YouTube / Drive Video Link]
+https://github.com/vyom-cpp/avquint-innovations-mern-project/blob/main/mern-project.mp4
 
 ---
 
