@@ -3,7 +3,10 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
+// import testOtpRoutes from "./routes/testOtpRoutes.js";
+import testRedisOtpRoutes from "./routes/testRedisOtpRoutes.js";
 
+import testRedisTtlRoutes from "./routes/testRedisTtlRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMid.js";
 import authRoutes from "./routes/authRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
@@ -34,6 +37,11 @@ app.use(limiter);
 // body parser
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// testing otp
+// app.use("/api/test-otp", testOtpRoutes);
+app.use("/api/test-redis-otp", testRedisOtpRoutes);
+app.use("/api/test-ttl", testRedisTtlRoutes);
 
 // logger
 if (process.env.NODE_ENV !== "production") {
