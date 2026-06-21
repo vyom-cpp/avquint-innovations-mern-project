@@ -2,6 +2,7 @@ import express from "express";
 
 import {
   registerUser,
+  verifyOTP,
   loginUser,
   getProfile,
 } from "../controllers/authController.js";
@@ -18,6 +19,8 @@ import { protect } from "../middleware/authMid.js";
 const router = express.Router();
 
 router.post("/register", registerValidation, validate, registerUser);
+
+router.post("/verify-otp", verifyOTP);
 
 router.post("/login", loginValidation, validate, loginUser);
 

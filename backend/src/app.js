@@ -3,8 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
-
-import testRedisTtlRoutes from "./routes/testRedisTtlRoutes.js";
+import testOtpEmailRoutes from "./routes/testOtpEmailRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMid.js";
 import authRoutes from "./routes/authRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
@@ -36,6 +35,8 @@ app.use(limiter);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// email verifier
+app.use("/api/test-otp-email", testOtpEmailRoutes);
 
 // logger
 if (process.env.NODE_ENV !== "production") {
