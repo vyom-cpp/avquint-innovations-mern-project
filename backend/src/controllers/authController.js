@@ -39,8 +39,6 @@ export const registerUser = async (req, res) => {
         });
       }
 
-      await sendOTPEmail(email, otp);
-
       return res.status(200).json({
         success: true,
         message: "Account already exists but is not verified. New OTP sent.",

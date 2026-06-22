@@ -21,7 +21,7 @@ const RegisterPage = () => {
 
   const navigate = useNavigate();
 
-  const { login } = useAuth();
+  // const { login } = useAuth();
 
   const [loading, setLoading] = useState(false);
 
@@ -29,13 +29,19 @@ const RegisterPage = () => {
     try {
       setLoading(true);
 
+      // const response = await registerUser(data);
+
+      // login(response.token, response.user);
+
+      // toast.success("Account Created");
+
+      // navigate("/dashboard");
+
       const response = await registerUser(data);
 
-      login(response.token, response.user);
+      toast.success(response.message);
 
-      toast.success("Account Created");
-
-      navigate("/dashboard");
+      navigate("/login");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Registration Failed");
     } finally {
