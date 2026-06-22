@@ -4,6 +4,8 @@ import {
   registerUser,
   verifyOTP,
   resendOTP,
+  forgotPassword,
+  resetPassword,
   loginUser,
   getProfile,
 } from "../controllers/authController.js";
@@ -24,6 +26,10 @@ router.post("/register", registerValidation, validate, registerUser);
 router.post("/verify-otp", verifyOTP);
 
 router.post("/resend-otp", resendOTP);
+
+router.post("/forgot-password", forgotPassword);
+
+router.post("/reset-password", resetPassword);
 
 router.post("/login", loginValidation, validate, loginUser);
 

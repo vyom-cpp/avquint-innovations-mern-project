@@ -30,8 +30,6 @@ export const registerUser = async (req, res) => {
 
       const emailResult = await sendOTPEmail(email, otp);
 
-      console.log(emailResult);
-
       if (emailResult.error) {
         return res.status(500).json({
           success: false,
@@ -165,6 +163,96 @@ export const resendOTP = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "OTP sent successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Forgot Password
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({
+      email,
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const otp = generateOTP();
+
+    const hashedOTP = await hashOTP(otp);
+
+    await redis.set(`reset:${email}`, hashedOTP, {
+      ex: 600,
+    });
+
+    await sendOTPEmail(email, otp);
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset OTP sent successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Reset Password
+export const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, password } = req.body;
+
+    const user = await User.findOne({
+      email,
+    }).select("+password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const storedHash = await redis.get(`reset:${email}`);
+
+    if (!storedHash) {
+      return res.status(400).json({
+        success: false,
+        message: "OTP expired or not found",
+      });
+    }
+
+    const isValid = await bcrypt.compare(otp, storedHash);
+
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP",
+      });
+    }
+
+    user.password = password;
+
+    await user.save();
+
+    await redis.del(`reset:${email}`);
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset successfully",
     });
   } catch (error) {
     res.status(500).json({
