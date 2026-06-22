@@ -1,49 +1,81 @@
-import { TextField, Stack, Typography } from "@mui/material";
-
+import { TextField, Stack, Typography, Alert } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-
 import { Link, useNavigate } from "react-router-dom";
-
 import { useForm } from "react-hook-form";
-
 import { useState } from "react";
-
 import { toast } from "react-toastify";
+import axios from "axios";
 
 import AuthLayout from "../layouts/AuthLayout";
-
 import { useAuth } from "../context/AuthContext";
-
 import { registerUser } from "../services/authService";
 
 const RegisterPage = () => {
   const { register, handleSubmit } = useForm();
 
-  const navigate = useNavigate();
+  const { login } = useAuth();
 
-  // const { login } = useAuth();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
 
-  const onSubmit = async (data) => {
+  const [showOtpInput, setShowOtpInput] = useState(false);
+
+  const [otp, setOtp] = useState("");
+
+  const [verificationEmail, setVerificationEmail] = useState("");
+
+  const onSubmit = async (formData) => {
     try {
       setLoading(true);
 
-      // const response = await registerUser(data);
+      const response = await registerUser(formData);
 
-      // login(response.token, response.user);
+      setVerificationEmail(formData.email);
 
-      // toast.success("Account Created");
+      setShowOtpInput(true);
 
-      // navigate("/dashboard");
-
-      const response = await registerUser(data);
-
-      toast.success(response.message);
-
-      navigate("/login");
+      toast.success(response.message || "OTP sent successfully");
     } catch (error) {
       toast.error(error?.response?.data?.message || "Registration Failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const maskEmail = (email) => {
+    if (!email) return "";
+
+    const [username, domain] = email.split("@");
+
+    if (username.length <= 6) {
+      return `${username.slice(0, 2)}****@${domain}`;
+    }
+
+    return `${username.slice(0, 2)}****${username.slice(-2)}@${domain}`;
+  };
+
+  const verifyOtpHandler = async () => {
+    try {
+      setLoading(true);
+
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/verify-otp`,
+        {
+          email: verificationEmail,
+          otp,
+        },
+      );
+
+      login(data.token, data.user);
+
+      toast.success("Email verified successfully");
+
+      navigate("/dashboard");
+    } catch (error) {
+      setOtp("");
+
+      toast.error(error?.response?.data?.message || "OTP Verification Failed");
     } finally {
       setLoading(false);
     }
@@ -53,25 +85,74 @@ const RegisterPage = () => {
     <AuthLayout title="Create Account" subtitle="Start managing tasks">
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>
-          <TextField label="Name" fullWidth {...register("name")} />
+          <TextField
+            label="Name"
+            fullWidth
+            disabled={showOtpInput}
+            {...register("name")}
+          />
 
-          <TextField label="Email" fullWidth {...register("email")} />
+          <TextField
+            label="Email"
+            fullWidth
+            disabled={showOtpInput}
+            {...register("email")}
+          />
 
           <TextField
             label="Password"
             type="password"
             fullWidth
+            disabled={showOtpInput}
             {...register("password")}
           />
 
-          <LoadingButton
-            loading={loading}
-            variant="contained"
-            size="large"
-            type="submit"
-          >
-            Register
-          </LoadingButton>
+          {!showOtpInput ? (
+            <LoadingButton
+              loading={loading}
+              variant="contained"
+              size="large"
+              type="submit"
+            >
+              Register
+            </LoadingButton>
+          ) : (
+            <>
+              <Alert severity="success">
+                OTP sent to <strong>{maskEmail(verificationEmail)}</strong>
+              </Alert>
+
+              <TextField
+                label="Enter OTP"
+                placeholder="6-digit OTP"
+                fullWidth
+                value={otp}
+                inputProps={{
+                  maxLength: 6,
+                  inputMode: "numeric",
+                }}
+                onChange={(e) =>
+                  setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && otp.length === 6) {
+                    verifyOtpHandler();
+                  }
+                }}
+              />
+
+              <LoadingButton
+                loading={loading}
+                variant="contained"
+                size="large"
+                type="button"
+                disabled={otp.length !== 6}
+                onClick={verifyOtpHandler}
+              >
+                Verify OTP
+              </LoadingButton>
+            </>
+          )}
 
           <Typography textAlign="center">
             Already have an account? <Link to="/login">Login</Link>
