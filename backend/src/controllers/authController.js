@@ -129,6 +129,51 @@ export const verifyOTP = async (req, res) => {
   }
 };
 
+// Resend Otp
+export const resendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({
+      email,
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.isVerified) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already verified",
+      });
+    }
+
+    const otp = generateOTP();
+
+    const hashedOTP = await hashOTP(otp);
+
+    await redis.set(`otp:${email}`, hashedOTP, {
+      ex: 600,
+    });
+
+    await sendOTPEmail(email, otp);
+
+    res.status(200).json({
+      success: true,
+      message: "OTP sent successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 // Login User
 export const loginUser = async (req, res) => {
   try {

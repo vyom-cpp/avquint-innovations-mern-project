@@ -25,6 +25,8 @@ const RegisterPage = () => {
 
   const [verificationEmail, setVerificationEmail] = useState("");
 
+  const [resendTimer, setResendTimer] = useState(30);
+
   const onSubmit = async (formData) => {
     try {
       setLoading(true);
@@ -34,6 +36,19 @@ const RegisterPage = () => {
       setVerificationEmail(formData.email);
 
       setShowOtpInput(true);
+
+      setResendTimer(30);
+
+      const interval = setInterval(() => {
+        setResendTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+
+          return prev - 1;
+        });
+      }, 1000);
 
       toast.success(response.message || "OTP sent successfully");
     } catch (error) {
@@ -76,6 +91,38 @@ const RegisterPage = () => {
       setOtp("");
 
       toast.error(error?.response?.data?.message || "OTP Verification Failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resendOtpHandler = async () => {
+    try {
+      setLoading(true);
+
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/resend-otp`,
+        {
+          email: verificationEmail,
+        },
+      );
+
+      toast.success(data.message);
+
+      setResendTimer(30);
+
+      const interval = setInterval(() => {
+        setResendTimer((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (error) {
+      toast.error(error?.response?.data?.message || "Failed to resend OTP");
     } finally {
       setLoading(false);
     }
@@ -134,11 +181,6 @@ const RegisterPage = () => {
                 onChange={(e) =>
                   setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))
                 }
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && otp.length === 6) {
-                    verifyOtpHandler();
-                  }
-                }}
               />
 
               <LoadingButton
@@ -151,6 +193,22 @@ const RegisterPage = () => {
               >
                 Verify OTP
               </LoadingButton>
+
+              <Typography textAlign="center" variant="body2">
+                {resendTimer > 0 ? (
+                  `Resend OTP in ${resendTimer}s`
+                ) : (
+                  <Link
+                    to="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      resendOtpHandler();
+                    }}
+                  >
+                    Resend OTP
+                  </Link>
+                )}
+              </Typography>
             </>
           )}
 
