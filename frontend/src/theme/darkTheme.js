@@ -1,7 +1,7 @@
 import { createTheme } from "@mui/material/styles";
 
 const productFontStack =
-  "Inter, 'Helvetica Neue', Helvetica, Arial, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+  "'Roboto Flex', 'Helvetica Neue', Helvetica, Arial, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
 
 export const notionColorsDark = {
   default: { bg: "#191919", text: "#D4D4D4" },

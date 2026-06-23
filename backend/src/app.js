@@ -7,6 +7,7 @@ import testOtpEmailRoutes from "./routes/testOtpEmailRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorMid.js";
 import authRoutes from "./routes/authRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 
 const app = express();
@@ -55,6 +56,7 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/admin", adminRoutes);
 
 // error middleware
 app.use(notFound);

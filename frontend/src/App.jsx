@@ -5,8 +5,9 @@ import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import TasksPage from "./pages/TaskPage";
-
+import AdminPage from "./pages/AdminPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import AdminRoute from "./routes/AdminRoute";
 
 function App() {
   return (
@@ -44,6 +45,15 @@ function App() {
           }
         />
 
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <AdminPage />
+            </AdminRoute>
+          }
+        />
+        
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>

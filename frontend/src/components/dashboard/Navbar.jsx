@@ -19,7 +19,11 @@ import { useThemeMode } from "../../theme/ThemeContext";
 const Navbar = ({ onMenuClick, isMobile, sidebarCollapsed }) => {
   const { mode, toggleTheme } = useThemeMode();
   const location = useLocation();
-  const pageTitle = location.pathname.startsWith("/tasks") ? "Tasks" : "Dashboard";
+  const pageTitle = location.pathname.startsWith("/admin")
+    ? "Admin"
+    : location.pathname.startsWith("/tasks")
+      ? "Tasks"
+      : "Dashboard";
 
   return (
     <AppBar

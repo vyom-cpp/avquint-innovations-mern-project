@@ -1,27 +1,41 @@
 import { Box, Typography, Stack, ButtonBase, Tooltip } from "@mui/material";
-import { Dashboard, Task } from "@mui/icons-material";
+import { Dashboard, Task, AdminPanelSettings } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
-
-const NAV_ITEMS = [
-  {
-    label: "Dashboard",
-    icon: <Dashboard sx={{ fontSize: 17 }} />,
-    path: "/dashboard",
-  },
-  { label: "Tasks", icon: <Task sx={{ fontSize: 17 }} />, path: "/tasks" },
-];
+import { useAuth } from "../../context/AuthContext";
 
 const Sidebar = ({ onClose, collapsed = false }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const { user } = useAuth();
+
+  const navItems = [
+    {
+      label: "Dashboard",
+      icon: <Dashboard sx={{ fontSize: 17 }} />,
+      path: "/dashboard",
+    },
+    {
+      label: "Tasks",
+      icon: <Task sx={{ fontSize: 17 }} />,
+      path: "/tasks",
+    },
+  ];
+
+  if (user?.role === "admin") {
+    navItems.push({
+      label: "Admin",
+      icon: <AdminPanelSettings sx={{ fontSize: 17 }} />,
+      path: "/admin",
+    });
+  }
+
   const handleNav = (path) => {
     navigate(path);
-    onClose?.(); // close mobile drawer after nav
+    onClose?.();
   };
 
   return (
-    // NO position:fixed here — parent (DashboardLayout) owns positioning
     <Box
       sx={{
         width: "100%",
@@ -34,7 +48,6 @@ const Sidebar = ({ onClose, collapsed = false }) => {
         transition: "padding 0.18s ease",
       }}
     >
-      {/* Brand */}
       <Typography
         variant="h6"
         fontWeight={700}
@@ -51,10 +64,10 @@ const Sidebar = ({ onClose, collapsed = false }) => {
         {collapsed ? "TF" : "TaskFlow"}
       </Typography>
 
-      {/* Nav items */}
       <Stack spacing={0.5}>
-        {NAV_ITEMS.map(({ label, icon, path }) => {
+        {navItems.map(({ label, icon, path }) => {
           const active = location.pathname === path;
+
           return (
             <Tooltip
               key={path}
@@ -76,7 +89,6 @@ const Sidebar = ({ onClose, collapsed = false }) => {
                   justifyContent: collapsed ? "center" : "flex-start",
                   color: active ? "text.primary" : "text.secondary",
                   bgcolor: active ? "action.hover" : "transparent",
-                  fontFamily: "inherit",
                   fontSize: "0.875rem",
                   fontWeight: active ? 500 : 400,
                   transition: "background 0.12s, color 0.12s",
