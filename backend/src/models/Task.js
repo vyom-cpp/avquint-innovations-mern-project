@@ -49,6 +49,11 @@ const taskSchema = new mongoose.Schema(
       type: Date,
     },
 
+    reminderSent: {
+      type: Boolean,
+      default: false,
+    },
+
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

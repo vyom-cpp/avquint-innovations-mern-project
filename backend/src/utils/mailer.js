@@ -45,3 +45,48 @@ export const sendOTPEmail = async (email, otp) => {
     `,
   });
 };
+
+export const sendTaskReminderEmail = async (email, task) => {
+  return await sendEmail({
+    to: email,
+
+    subject: `Task Reminder: ${task.title}`,
+
+    html: `
+      <div style="font-family: Arial, sans-serif;">
+        <h2>⏰ Task Reminder</h2>
+
+        <p>
+          Your task is due soon:
+        </p>
+
+        <h3>${task.title}</h3>
+
+        <p>
+          ${task.description || "No description provided"}
+        </p>
+
+        <p>
+          <strong>Priority:</strong>
+          ${task.priority}
+        </p>
+
+        <p>
+          <strong>Due:</strong>
+          ${new Date(task.dueDate).toLocaleString()}
+        </p>
+
+        <p>
+          Please complete this task
+          before the deadline.
+        </p>
+
+        <hr />
+
+        <p>
+          TaskFlow Reminder System
+        </p>
+      </div>
+    `,
+  });
+};
