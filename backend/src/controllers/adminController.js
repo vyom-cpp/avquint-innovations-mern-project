@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import Task from "../models/Task.js";
+import AIServiceStatus from "../models/AIServiceStatus.js";
 
 // GET /api/admin/stats
 export const getAdminStats = async (req, res) => {
@@ -113,6 +114,46 @@ export const updateUserRole = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Role updated successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// Checking AI Health
+export const getAIHealth = async (req, res) => {
+  try {
+    const lastSuccess = await AIServiceStatus.findOne({
+      service: "gemini",
+      status: "operational",
+    }).sort({ createdAt: -1 });
+
+    const lastFailure = await AIServiceStatus.findOne({
+      service: "gemini",
+      status: "failed",
+    }).sort({ createdAt: -1 });
+
+    let status = "unknown";
+
+    if (lastSuccess && !lastFailure) {
+      status = "operational";
+    } else if (!lastSuccess && lastFailure) {
+      status = "down";
+    } else if (lastSuccess && lastFailure) {
+      status =
+        lastSuccess.createdAt > lastFailure.createdAt ? "operational" : "down";
+    }
+
+    res.status(200).json({
+      success: true,
+      service: "gemini",
+      status,
+      lastSuccess,
+      lastFailure,
+      failureReason: lastFailure?.error || null,
     });
   } catch (error) {
     res.status(500).json({

@@ -4,6 +4,7 @@
   "type": "module",
   "main": "src/server.js",
   "dependencies": {
+    "@google/genai": "^2.10.0",
     "@upstash/redis": "^1.38.0",
     "accepts": "^2.0.0",
     "acorn": "^8.16.0",
@@ -129,6 +130,7 @@
     "on-finished": "^2.4.1",
     "on-headers": "^1.1.0",
     "once": "^1.4.0",
+    "openai": "^6.44.0",
     "optionator": "^0.9.4",
     "p-limit": "^3.1.0",
     "p-locate": "^5.0.0",

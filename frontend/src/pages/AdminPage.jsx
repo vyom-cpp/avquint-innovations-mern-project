@@ -30,6 +30,8 @@ import {
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import AccessTime from "@mui/icons-material/AccessTime";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import ErrorRoundedIcon from "@mui/icons-material/ErrorRounded";
 
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 
@@ -38,6 +40,7 @@ import {
   getUsers,
   deleteUser,
   updateUserRole,
+  getAIHealth,
 } from "../services/adminService";
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
@@ -54,6 +57,7 @@ const useClock = () => {
 
 const AdminPage = () => {
   const [stats, setStats] = useState(null);
+  const [aiHealth, setAIHealth] = useState(null);
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -66,13 +70,15 @@ const AdminPage = () => {
 
   const refreshData = useCallback(async () => {
     try {
-      const [statsData, usersData] = await Promise.all([
+      const [statsData, usersData, aiHealthData] = await Promise.all([
         getAdminStats(),
         getUsers(),
+        getAIHealth(),
       ]);
 
       setStats(statsData.stats);
       setUsers(usersData.users);
+      setAIHealth(aiHealthData);
     } catch (error) {
       console.error(error);
     }
@@ -141,6 +147,12 @@ const AdminPage = () => {
     { title: "Completed Tasks", value: stats.completedTasks, color: "#7F77DD" },
     { title: "Pending Tasks", value: stats.pendingTasks, color: "#D9485F" },
   ];
+
+  const aiCard = aiHealth && {
+    title: "AI Service",
+    value: aiHealth.status === "operational" ? "Operational" : "Down",
+    color: aiHealth.status === "operational" ? "#1D9E75" : "#D9485F",
+  };
 
   return (
     <DashboardLayout>
@@ -221,6 +233,57 @@ const AdminPage = () => {
             </Grid>
           ))}
         </Grid>
+
+        {aiCard && (
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mb: 3.5,
+              borderRadius: 4,
+              borderTop: `4px solid ${aiCard.color}`,
+            }}
+          >
+            <Typography variant="body2" color="text.secondary">
+              AI Service Status
+            </Typography>
+
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                mt: 1,
+              }}
+            >
+              {aiHealth.status === "operational" ? (
+                <CheckCircleRoundedIcon
+                  sx={{
+                    color: "#1D9E75",
+                    fontSize: 24,
+                  }}
+                />
+              ) : (
+                <ErrorRoundedIcon
+                  sx={{
+                    color: "#D9485F",
+                    fontSize: 24,
+                  }}
+                />
+              )}
+
+              <Typography variant="h5" fontWeight={700} color={aiCard.color}>
+                {aiHealth.status === "operational" ? "Operational" : "Down"}
+              </Typography>
+            </Box>
+
+            {aiHealth.failureReason && (
+              <Typography variant="body2" color="text.secondary" mt={1}>
+                Last Failure: {aiHealth.failureReason}
+              </Typography>
+            )}
+          </Paper>
+        )}
 
         {/* ── Users section ── */}
         <Paper elevation={0} sx={{ mt: 2, p: 3, borderRadius: 4 }}>

@@ -8,6 +8,7 @@ import {
   getAllUsers,
   deleteUser,
   updateUserRole,
+  getAIHealth,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -19,5 +20,7 @@ router.get("/users", protect, adminOnly, getAllUsers);
 router.delete("/users/:id", protect, adminOnly, deleteUser);
 
 router.patch("/users/:id/role", protect, adminOnly, updateUserRole);
+
+router.get("/ai-health", protect, adminOnly, getAIHealth);
 
 export default router;
