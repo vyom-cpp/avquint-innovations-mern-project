@@ -78,10 +78,8 @@ const Navbar = ({ onMenuClick, isMobile, sidebarCollapsed }) => {
           {pageTitle}
         </Typography>
 
-        {/* Push everything else to the right */}
         <Box sx={{ flex: 1 }} />
 
-        {/* Theme toggle */}
         <Tooltip title={mode === "dark" ? "Light mode" : "Dark mode"} arrow>
           <IconButton
             onClick={toggleTheme}
@@ -102,7 +100,6 @@ const Navbar = ({ onMenuClick, isMobile, sidebarCollapsed }) => {
           </IconButton>
         </Tooltip>
 
-        {/* Avatar — rightmost, no ml auto needed because spacer Box handles it */}
         <Box sx={{ ml: 0.5, flexShrink: 0 }}>
           <UserMenu />
         </Box>

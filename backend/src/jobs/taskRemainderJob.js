@@ -5,13 +5,13 @@ import User from "../models/User.js";
 
 import { sendTaskReminderEmail } from "../utils/mailer.js";
 
-cron.schedule("0 * * * *", async () => {
+cron.schedule("*/15 * * * *", async () => {
   try {
     console.log("Running task reminder job...");
 
     const now = new Date();
 
-    const next24Hours = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    const nextHour = new Date(now.getTime() + 60 * 60 * 1000);
 
     const tasks = await Task.find({
       status: "pending",
@@ -20,7 +20,7 @@ cron.schedule("0 * * * *", async () => {
 
       dueDate: {
         $gte: now,
-        $lte: next24Hours,
+        $lte: nextHour,
       },
     });
 

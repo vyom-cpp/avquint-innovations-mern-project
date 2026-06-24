@@ -66,6 +66,7 @@ const defaultForm = {
   priority: "medium",
   color: "default",
   dueDate: "",
+  dueTime: "",
 };
 
 // ── clock hook ───────────────────────────────────────────
@@ -114,7 +115,26 @@ const DashboardPage = () => {
     if (!form.title.trim()) return;
     setLoading(true);
     try {
-      await createTask(form);
+      const payload = { ...form };
+
+      if (form.dueDate) {
+        const [yyyy, mm, dd] = form.dueDate.split("-").map(Number);
+
+        if (form.dueTime) {
+          const [hours, minutes] = form.dueTime.split(":").map(Number);
+          const finalDate = new Date(yyyy, mm - 1, dd, hours, minutes, 0);
+          payload.dueDate = finalDate.toISOString();
+          payload.hasCustomTime = true;
+        } else {
+          const finalDate = new Date(yyyy, mm - 1, dd, 23, 59, 0);
+          payload.dueDate = finalDate.toISOString();
+          payload.hasCustomTime = false;
+        }
+      }
+
+      delete payload.dueTime;
+
+      await createTask(payload);
       setModal(false);
       setForm(defaultForm);
       refresh();
@@ -129,6 +149,14 @@ const DashboardPage = () => {
     await toggleStatus(id);
     refresh();
   };
+
+  const todayStr = (() => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  })();
 
   return (
     <DashboardLayout>
@@ -501,22 +529,70 @@ const DashboardPage = () => {
               mb: 1,
             }}
           >
-            Due Date
+            Due Date & Time
           </Typography>
-          <TextField
-            type="date"
-            fullWidth
-            size="small"
-            inputProps={{
-              "aria-label": "Due date",
-              min: new Date().toISOString().split("T")[0],
-            }}
-            value={form.dueDate}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, dueDate: e.target.value }))
-            }
-            sx={{ mb: 2.5 }}
-          />
+
+          {/* Date + Time side by side */}
+          <Box sx={{ display: "flex", gap: 1.5, mb: 1 }}>
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: "block", mb: 0.5, fontSize: "0.72rem" }}
+              >
+                Date
+              </Typography>
+              <TextField
+                type="date"
+                size="small"
+                fullWidth
+                inputProps={{ min: todayStr }}
+                value={form.dueDate}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, dueDate: e.target.value }))
+                }
+              />
+            </Box>
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ display: "block", mb: 0.5, fontSize: "0.72rem" }}
+              >
+                Time (optional)
+              </Typography>
+              <TextField
+                type="time"
+                size="small"
+                fullWidth
+                inputProps={{ step: 300 }}
+                value={form.dueTime}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, dueTime: e.target.value }))
+                }
+                disabled={!form.dueDate}
+                sx={{
+                  "& input[type='time']::-webkit-calendar-picker-indicator": {
+                    opacity: 0.5,
+                    cursor: "pointer",
+                  },
+                }}
+              />
+            </Box>
+          </Box>
+
+          {/* Helper text below the row */}
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            sx={{ display: "block", mb: 2.5 }}
+          >
+            {!form.dueDate
+              ? "Pick a date first to enable the time field"
+              : form.dueTime
+                ? `Reminder at ${form.dueTime}`
+                : "No time set — defaults to 11:59 PM"}
+          </Typography>
 
           <Typography
             variant="caption"

@@ -3,7 +3,8 @@ import Task from "../models/Task.js";
 // create task
 export const createTask = async (req, res) => {
   try {
-    const { title, description, priority, dueDate, color } = req.body;
+    const { title, description, priority, dueDate, color, hasCustomTime } =
+      req.body;
 
     const task = await Task.create({
       title,
@@ -11,6 +12,7 @@ export const createTask = async (req, res) => {
       priority,
       dueDate,
       color,
+      hasCustomTime,
       userId: req.user.id,
     });
 
@@ -109,17 +111,30 @@ export const getTaskById = async (req, res) => {
 // update task
 export const updateTask = async (req, res) => {
   try {
-    const task = await Task.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        userId: req.user.id,
-      },
-      req.body,
-      {
-        new: true,
-        runValidators: true,
-      },
-    );
+    const task = await Task.findOne({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    const oldDueDate = task.dueDate?.getTime();
+
+    Object.assign(task, req.body);
+
+    if (
+      req.body.dueDate &&
+      new Date(req.body.dueDate).getTime() !== oldDueDate
+    ) {
+      task.reminderSent = false;
+    }
+
+    await task.save();
 
     if (!task) {
       return res.status(404).json({

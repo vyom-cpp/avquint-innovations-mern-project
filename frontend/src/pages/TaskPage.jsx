@@ -66,6 +66,7 @@ const defaultForm = {
   priority: "medium",
   color: "default",
   dueDate: "",
+  dueTime: "",
 };
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
@@ -74,14 +75,21 @@ const priorityMeta = (p) =>
   PRIORITIES.find((x) => x.value === p) ?? PRIORITIES[1];
 const colorMeta = (id) =>
   NOTION_COLORS.find((c) => c.id === id) ?? NOTION_COLORS[0];
-const fmt = (d) =>
-  d
-    ? new Date(d).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : null;
+const fmt = (d, hasCustomTime) => {
+  if (!d) return null;
+  const dateObj = new Date(d);
+  const baseOptions = {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  };
+  // Only include time if hasCustomTime is true
+  if (hasCustomTime) {
+    baseOptions.hour = "numeric";
+    baseOptions.minute = "2-digit";
+  }
+  return dateObj.toLocaleString("en-US", baseOptions);
+};
 
 const TasksPage = () => {
   const theme = useTheme();
@@ -133,11 +141,41 @@ const TasksPage = () => {
 
   const handleCreate = async () => {
     if (!form.title.trim()) return;
+
     setCreating(true);
+
     try {
-      await createTask(form);
+      const payload = {
+        ...form,
+      };
+
+      if (form.dueDate) {
+        const finalDate = new Date(form.dueDate);
+
+        if (form.dueTime) {
+          const [hours, minutes] = form.dueTime.split(":");
+
+          finalDate.setHours(Number(hours));
+          finalDate.setMinutes(Number(minutes));
+          finalDate.setSeconds(0);
+
+          payload.hasCustomTime = true;
+        } else {
+          finalDate.setHours(23);
+          finalDate.setMinutes(59);
+          finalDate.setSeconds(0);
+
+          payload.hasCustomTime = false;
+        }
+
+        payload.dueDate = finalDate.toISOString();
+      }
+
+      await createTask(payload);
+
       setModal(false);
       setForm(defaultForm);
+
       load();
     } finally {
       setCreating(false);
@@ -426,7 +464,7 @@ const TasksPage = () => {
                         display: { xs: "none", sm: "block" },
                       }}
                     >
-                      {fmt(task.dueDate)}
+                      {fmt(task.dueDate, task.hasCustomTime)}
                     </Typography>
                   )}
 
@@ -615,22 +653,63 @@ const TasksPage = () => {
               mb: 1,
             }}
           >
-            Due Date
+            Due Date & Time
           </Typography>
           <TextField
+            label="Due Date"
             type="date"
             fullWidth
             size="small"
+            InputLabelProps={{
+              shrink: true,
+            }}
             inputProps={{
-              "aria-label": "Due date",
-              min: new Date().toISOString().split("T")[0],
+              min: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
+                .toISOString()
+                .split("T")[0],
             }}
             value={form.dueDate}
             onChange={(e) =>
-              setForm((f) => ({ ...f, dueDate: e.target.value }))
+              setForm((f) => ({
+                ...f,
+                dueDate: e.target.value,
+              }))
             }
-            sx={{ mb: 2.5 }}
+            sx={{ mb: 1.5 }}
           />
+
+          <TextField
+            label="Due Time (Optional)"
+            type="time"
+            fullWidth
+            size="small"
+            InputLabelProps={{
+              shrink: true,
+            }}
+            inputProps={{
+              step: 300, // 5-minute intervals
+            }}
+            value={form.dueTime}
+            onChange={(e) =>
+              setForm((f) => ({
+                ...f,
+                dueTime: e.target.value,
+              }))
+            }
+            helperText={
+              form.dueTime
+                ? "Reminder will fire at this time"
+                : "Leave empty to default to end of day (11:59 PM)"
+            }
+            sx={{
+              mb: 2.5,
+              "& input[type='time']::-webkit-calendar-picker-indicator": {
+                opacity: 0.5,
+                cursor: "pointer",
+              },
+            }}
+          />
+
           <Typography
             variant="caption"
             fontWeight={500}
