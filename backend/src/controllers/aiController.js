@@ -1,5 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
-import AIServiceStatus from "../models/AIServiceStatus.js";
+import { markOperational, markFailed } from "../services/aiHealthService.js";
 
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
@@ -59,18 +59,11 @@ ${text}
     try {
       tasks = JSON.parse(raw);
 
-      await AIServiceStatus.create({
-        service: "gemini",
-        status: "operational",
-      });
+      await markOperational();
     } catch (e) {
       console.error("Invalid Gemini Response:", raw);
 
-      await AIServiceStatus.create({
-        service: "gemini",
-        status: "failed",
-        error: "invalid_json",
-      });
+      await markFailed("invalid_json");
 
       return res.status(500).json({
         success: false,
@@ -99,11 +92,7 @@ ${text}
       errorType = "invalid_api_key";
     }
 
-    await AIServiceStatus.create({
-      service: "gemini",
-      status: "failed",
-      error: errorType,
-    });
+    await markFailed(errorType);
 
     res.status(500).json({
       success: false,

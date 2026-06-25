@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { Logout, AccountCircle } from "@mui/icons-material";
 import { useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { useNavigate } from "react-router-dom";
 
 const UserMenu = () => {

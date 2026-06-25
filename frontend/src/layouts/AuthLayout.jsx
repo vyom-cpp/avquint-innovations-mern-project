@@ -11,7 +11,7 @@ import {
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 
-import { useThemeMode } from "../theme/ThemeContext";
+import { useThemeMode } from "../theme/useThemeMode";
 
 const AuthLayout = ({
   title,

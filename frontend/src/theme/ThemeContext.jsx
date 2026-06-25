@@ -1,9 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { useMemo, useState } from "react";
 
 import {
   ThemeProvider,
@@ -13,9 +8,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 
 import lightTheme from "./lightTheme";
 import darkTheme from "./darkTheme";
-
-const ThemeContextCustom =
-  createContext();
+import ThemeContextCustom from "./themeContext";
 
 export const ThemeProviderCustom = ({
   children,
@@ -63,8 +56,3 @@ export const ThemeProviderCustom = ({
     </ThemeContextCustom.Provider>
   );
 };
-
-export const useThemeMode = () =>
-  useContext(
-    ThemeContextCustom
-  );

@@ -1,7 +1,7 @@
 import { Box, Typography, Stack, ButtonBase, Tooltip } from "@mui/material";
 import { Dashboard, Task, AdminPanelSettings } from "@mui/icons-material";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 
 const Sidebar = ({ onClose, collapsed = false }) => {
   const location = useLocation();

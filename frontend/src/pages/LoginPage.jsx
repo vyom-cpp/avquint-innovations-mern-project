@@ -14,7 +14,7 @@ import { toast } from "react-toastify";
 
 import AuthLayout from "../layouts/AuthLayout";
 
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 
 import { loginUser } from "../services/authService";
 

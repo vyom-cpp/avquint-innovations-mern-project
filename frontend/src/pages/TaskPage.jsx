@@ -4,16 +4,9 @@ import {
   Button,
   TextField,
   InputAdornment,
-  ToggleButtonGroup,
-  ToggleButton,
   Chip,
   Divider,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Slide,
   useTheme,
   useMediaQuery,
   CircularProgress,
@@ -29,18 +22,10 @@ import {
   CheckCircle,
   RadioButtonUnchecked,
 } from "@mui/icons-material";
-import { forwardRef, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DashboardLayout from "../components/dashboard/DashboardLayout";
-import {
-  createTask,
-  getTasks,
-  toggleStatus,
-  deleteTask,
-} from "../services/taskService";
-
-const SlideUp = forwardRef((props, ref) => (
-  <Slide direction="up" ref={ref} {...props} />
-));
+import CreateTaskDialog from "../components/tasks/CreateTaskDialog";
+import { getTasks, toggleStatus, deleteTask } from "../services/taskService";
 
 const NOTION_COLORS = [
   { id: "default", bg: "#F1F1EF", text: "#787774", label: "Gray" },
@@ -59,15 +44,6 @@ const PRIORITIES = [
   { value: "medium", label: "Medium", bg: "#FAF3DD", color: "#C29343" },
   { value: "low", label: "Low", bg: "#EEF3ED", color: "#548164" },
 ];
-
-const defaultForm = {
-  title: "",
-  description: "",
-  priority: "medium",
-  color: "default",
-  dueDate: "",
-  dueTime: "",
-};
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
 
@@ -100,8 +76,6 @@ const TasksPage = () => {
   const [total, setTotal] = useState(0);
   const [pages, setPages] = useState(1);
   const [modalOpen, setModal] = useState(false);
-  const [form, setForm] = useState(defaultForm);
-  const [creating, setCreating] = useState(false);
 
   // filter state
   const [search, setSearch] = useState("");
@@ -136,51 +110,8 @@ const TasksPage = () => {
   }, [search, statusF, priorityF, sort, page, limit]);
 
   useEffect(() => {
-    load();
+    queueMicrotask(load);
   }, [load]);
-
-  const handleCreate = async () => {
-    if (!form.title.trim()) return;
-
-    setCreating(true);
-
-    try {
-      const payload = {
-        ...form,
-      };
-
-      if (form.dueDate) {
-        const finalDate = new Date(form.dueDate);
-
-        if (form.dueTime) {
-          const [hours, minutes] = form.dueTime.split(":");
-
-          finalDate.setHours(Number(hours));
-          finalDate.setMinutes(Number(minutes));
-          finalDate.setSeconds(0);
-
-          payload.hasCustomTime = true;
-        } else {
-          finalDate.setHours(23);
-          finalDate.setMinutes(59);
-          finalDate.setSeconds(0);
-
-          payload.hasCustomTime = false;
-        }
-
-        payload.dueDate = finalDate.toISOString();
-      }
-
-      await createTask(payload);
-
-      setModal(false);
-      setForm(defaultForm);
-
-      load();
-    } finally {
-      setCreating(false);
-    }
-  };
 
   const handleToggle = async (id) => {
     await toggleStatus(id);
@@ -567,271 +498,11 @@ const TasksPage = () => {
         </Box>
       )}
 
-      {/* ── Create Task modal (same as dashboard) ───── */}
-      <Dialog
+      <CreateTaskDialog
         open={modalOpen}
-        onClose={() => {
-          setModal(false);
-          setForm(defaultForm);
-        }}
-        fullScreen={isMobile}
-        TransitionComponent={isMobile ? SlideUp : undefined}
-        PaperProps={{
-          elevation: 0,
-          sx: {
-            borderRadius: isMobile ? "20px 20px 0 0" : "12px",
-            border: "0.5px solid",
-            borderColor: "divider",
-            m: 0,
-            position: isMobile ? "fixed" : "relative",
-            bottom: isMobile ? 0 : "auto",
-            left: isMobile ? 0 : "auto",
-            right: isMobile ? 0 : "auto",
-            width: isMobile ? "100%" : 460,
-            maxWidth: "100%",
-            maxHeight: isMobile ? "92dvh" : "90vh",
-            overflowY: "auto",
-          },
-        }}
-      >
-        {isMobile && (
-          <Box
-            sx={{
-              width: 36,
-              height: 4,
-              borderRadius: 2,
-              bgcolor: "divider",
-              mx: "auto",
-              mt: 1.5,
-              mb: 0.5,
-            }}
-          />
-        )}
-        <DialogTitle
-          sx={{
-            fontSize: "1rem",
-            fontWeight: 700,
-            letterSpacing: "-0.02em",
-            pt: isMobile ? 1 : 2.5,
-            pb: 1,
-            px: 2.5,
-          }}
-        >
-          Create Task
-        </DialogTitle>
-        <DialogContent sx={{ px: 2.5, pb: 1, pt: "4px !important" }}>
-          <TextField
-            label="Title"
-            placeholder="Task title..."
-            fullWidth
-            size="small"
-            value={form.title}
-            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-            sx={{ mb: 2, mt: 0.5 }}
-          />
-          <TextField
-            label="Description"
-            placeholder="Add a description..."
-            fullWidth
-            multiline
-            rows={2}
-            size="small"
-            value={form.description}
-            onChange={(e) =>
-              setForm((f) => ({ ...f, description: e.target.value }))
-            }
-            sx={{ mb: 2 }}
-          />
-          <Typography
-            variant="caption"
-            fontWeight={500}
-            color="text.secondary"
-            sx={{
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              display: "block",
-              mb: 1,
-            }}
-          >
-            Due Date & Time
-          </Typography>
-          <TextField
-            label="Due Date"
-            type="date"
-            fullWidth
-            size="small"
-            InputLabelProps={{
-              shrink: true,
-            }}
-            inputProps={{
-              min: new Date(Date.now() - new Date().getTimezoneOffset() * 60000)
-                .toISOString()
-                .split("T")[0],
-            }}
-            value={form.dueDate}
-            onChange={(e) =>
-              setForm((f) => ({
-                ...f,
-                dueDate: e.target.value,
-              }))
-            }
-            sx={{ mb: 1.5 }}
-          />
-
-          <TextField
-            label="Due Time (Optional)"
-            type="time"
-            fullWidth
-            size="small"
-            InputLabelProps={{
-              shrink: true,
-            }}
-            inputProps={{
-              step: 300, // 5-minute intervals
-            }}
-            value={form.dueTime}
-            onChange={(e) =>
-              setForm((f) => ({
-                ...f,
-                dueTime: e.target.value,
-              }))
-            }
-            helperText={
-              form.dueTime
-                ? "Reminder will fire at this time"
-                : "Leave empty to default to end of day (11:59 PM)"
-            }
-            sx={{
-              mb: 2.5,
-              "& input[type='time']::-webkit-calendar-picker-indicator": {
-                opacity: 0.5,
-                cursor: "pointer",
-              },
-            }}
-          />
-
-          <Typography
-            variant="caption"
-            fontWeight={500}
-            color="text.secondary"
-            sx={{
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              display: "block",
-              mb: 1,
-            }}
-          >
-            Priority
-          </Typography>
-          <ToggleButtonGroup
-            exclusive
-            value={form.priority}
-            onChange={(_, v) => v && setForm((f) => ({ ...f, priority: v }))}
-            sx={{ mb: 2.5, display: "flex", gap: 1 }}
-          >
-            {PRIORITIES.map((p) => (
-              <ToggleButton
-                key={p.value}
-                value={p.value}
-                sx={{
-                  flex: 1,
-                  py: 0.75,
-                  borderRadius: "8px !important",
-                  border: "0.5px solid !important",
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  textTransform: "none",
-                  bgcolor: p.bg,
-                  color: p.color,
-                  borderColor: `${p.color}55 !important`,
-                  "&.Mui-selected, &.Mui-selected:hover": {
-                    bgcolor: p.bg,
-                    color: p.color,
-                    boxShadow: `inset 0 0 0 1.5px ${p.color}`,
-                  },
-                  "&:hover": { bgcolor: p.bg, opacity: 0.8 },
-                }}
-              >
-                {p.label}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
-          <Typography
-            variant="caption"
-            fontWeight={500}
-            color="text.secondary"
-            sx={{
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              display: "block",
-              mb: 1,
-            }}
-          >
-            Color Tag
-          </Typography>
-          <Box display="flex" flexWrap="wrap" gap={0.75} mb={1}>
-            {NOTION_COLORS.map((c) => (
-              <Chip
-                key={c.id}
-                label={c.label}
-                size="small"
-                onClick={() => setForm((f) => ({ ...f, color: c.id }))}
-                sx={{
-                  height: 24,
-                  fontSize: "0.7rem",
-                  fontWeight: 600,
-                  bgcolor: c.bg,
-                  color: c.text,
-                  border: "1.5px solid",
-                  borderColor: form.color === c.id ? c.text : "transparent",
-                  cursor: "pointer",
-                  transition: "border-color 0.12s",
-                }}
-              />
-            ))}
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ px: 2.5, pb: isMobile ? 3 : 2.5, pt: 1, gap: 1 }}>
-          <Button
-            onClick={() => {
-              setModal(false);
-              setForm(defaultForm);
-            }}
-            fullWidth
-            sx={{
-              border: "0.5px solid",
-              borderColor: "divider",
-              borderRadius: "8px",
-              color: "text.secondary",
-              textTransform: "none",
-              fontWeight: 500,
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleCreate}
-            disabled={!form.title.trim() || creating}
-            fullWidth
-            disableElevation
-            variant="contained"
-            sx={{
-              bgcolor: "text.primary",
-              color: "background.default",
-              borderRadius: "8px",
-              textTransform: "none",
-              fontWeight: 600,
-              "&:hover": { bgcolor: "text.primary", opacity: 0.85 },
-              "&.Mui-disabled": {
-                bgcolor: "action.disabledBackground",
-                color: "text.disabled",
-              },
-            }}
-          >
-            {creating ? "Creating..." : "Create Task"}
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onClose={() => setModal(false)}
+        onTaskCreated={load}
+      />
     </DashboardLayout>
   );
 };

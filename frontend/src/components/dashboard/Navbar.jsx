@@ -14,7 +14,7 @@ import {
 } from "@mui/icons-material";
 import { useLocation } from "react-router-dom";
 import UserMenu from "./UserMenu";
-import { useThemeMode } from "../../theme/ThemeContext";
+import { useThemeMode } from "../../theme/useThemeMode";
 
 const Navbar = ({ onMenuClick, isMobile, sidebarCollapsed }) => {
   const { mode, toggleTheme } = useThemeMode();

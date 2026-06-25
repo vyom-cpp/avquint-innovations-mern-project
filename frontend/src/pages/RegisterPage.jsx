@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 
 import AuthLayout from "../layouts/AuthLayout";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { registerUser } from "../services/authService";
 
 const RegisterPage = () => {
